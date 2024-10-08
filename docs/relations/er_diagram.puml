@@ -1,0 +1,88 @@
+@startuml
+
+entity User {
+  * id: uuid
+  --
+  * username: string
+  * password: string
+  * email: string
+}
+
+entity Home {
+  * id: uuid
+  --
+  * name: string
+  * owner_id: uuid
+  address: text
+  user_ids: uuid[]
+}
+
+entity Room {
+  * id: uuid
+  ---
+  * home_id: uuid
+  * name: uuid
+  * device_ids: uuid[]
+}
+
+entity Scenario {
+  * id: uuid
+  ---
+  * scenario: json
+}
+
+entity Device {
+  * id: uuid
+  --
+  * serial_number: number
+  * type: Device_Type
+  * device_info: Partner_Device
+  name: string
+  status: Device_Status
+}
+
+entity Partner_Device {
+  * id: uuid
+  ---
+  * description: text
+  * image: text
+  * supported: boolean
+  manual: text
+}
+
+entity Telemetry {
+  * id: uuid
+  --
+  * device_id: uuid
+  * data: json
+  * timestamp: datetime
+}
+
+enum Device_Status {
+  ON
+  OFF
+}
+
+enum Device_Type {
+  HEATING
+  ACCESS_CONTROL
+  CAMERA
+  LIGHT
+}
+
+enum ScenarioCommand {
+  IF
+  RUN
+  STOP
+  WHILE
+  BREAK
+}
+
+User ||--o{ Home
+Home ||--o{ Room
+Room ||--o{ Device
+Device ||--o{ Telemetry
+Scenario ||--o{ Device
+Partner_Device ||--o{ Device
+
+@enduml

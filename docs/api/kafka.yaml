@@ -1,0 +1,33 @@
+asyncapi: '2.6.0'
+info:
+  title: Kafka
+  version: 1.0.0
+
+servers:
+  production:
+    url: 'https://api.example.com'
+    protocol: https
+    protocolVersion: '1.1'
+
+channels:
+  command:
+    subscribe:
+      summary: Send Command to device
+      operationId: sendCommand
+      message:
+        messageId: 'sendCommand'
+        payload:
+          type: object
+          properties:
+            command:
+              type: string
+              description: Run command
+              enum:
+                - temperature
+                - open
+                - turn_on
+            serial_number:
+              type: string
+              description: device serial number
+
+defaultContentType: application/json

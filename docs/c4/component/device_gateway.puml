@@ -1,0 +1,16 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Component_Ext(device, "Device", "Физическое устройство")
+Component_Ext(kafka, "Kafka")
+
+Container_Boundary(device_gateway_component, "Device Gateway") {
+  Component(device_gateway_controller, "DeviceGatewayController", "", "Обрабатывает пришедшие запросы от датчика")
+  Component(device_gateway_service, "DeviceGatewayService", "", "Преобразует данные и передает их в нужный топик")
+}
+
+Rel(device, device_gateway_controller, "", "MQTT")
+Rel(device_gateway_controller, device_gateway_service, "")
+Rel(device_gateway_service, kafka, "Pub/Sub")
+
+@enduml

@@ -1,0 +1,22 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Component_Ext(api_gateway, "API Gateway")
+
+Container_Boundary(device_component, "Device Service") {
+  Component(device_controller, "DeviceController", "", "Обрабатывает пришедшие запросы, связанные с датчиками")
+  Component(device_service, "DeviceService", "", "Содержит бизнес-логику")
+  Component(device_repository, "DeviceRepository", "", "Содержит логику по работе с базой данных")
+}
+ComponentDb_Ext(device_db, "DeviceDB", "", "Хранит конфигуации и информацию по датчикам")
+ComponentQueue_Ext(kafka, "Kafka")
+
+Rel(api_gateway, device_controller, "")
+Rel(device_controller, device_service, "")
+Rel(device_service, device_repository, "")
+Rel(device_repository, device_db, "")
+
+Rel(device_service, kafka, "- heatin\n - light\n - gate\n - camera", "Sub")
+Rel(kafka, device_service, "- command", "Pub")
+
+@enduml

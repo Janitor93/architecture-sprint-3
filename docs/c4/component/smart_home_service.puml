@@ -1,0 +1,18 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Component_Ext(api_gateway, "API Gateway")
+
+Container_Boundary(smart_home_service_component, "Smart Home Service") {
+  Component(smart_home_controller, "SmartHomeController", "", "Обрабатывает пришедшие запросы, связанные с умным домом")
+  Component(smart_home_service, "SmartHomeService", "", "Содержит бизнес-логику")
+  Component(smart_home_repository, "SmartHomeRepository", "", "Содержит логику по работе с базой данных")
+}
+ComponentDb_Ext(smart_home_db, "SmartHomeDB", "PostgreSQL", "Хранит конфигуации и информацию по умному дому")
+
+Rel(api_gateway, smart_home_controller, "")
+Rel(smart_home_controller, smart_home_service, "")
+Rel(smart_home_service, smart_home_repository, "")
+Rel(smart_home_repository, smart_home_db, "")
+
+@enduml

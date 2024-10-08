@@ -1,0 +1,12 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+Person(user, "User", "Uses the SmartHome")
+System_Boundary(smart_home, "Smart Home") {
+  System(smart_home_app, "Smart Home App", "Contains all logic to interact with users and sensors")
+}
+System_Ext(sensors, "Sensors", "Physical sensors")
+
+Rel(user, smart_home_app, "Uses")
+BiRel(smart_home_app, sensors, "Data exchange")
+@enduml

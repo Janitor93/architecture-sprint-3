@@ -1,0 +1,166 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Device Service API
+
+paths:
+  /device:
+    post:
+      summary: Add device
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                serial_number:
+                  type: string
+                type:
+                  type: string
+                  $ref: '#/components/schemas/DeviceType'
+                partner_device_id:
+                  type: string
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        "400":
+          description: Ошибка валидации
+  /device/:id:
+    get:
+      summary: Get device by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        "404":
+          description: Датчик не найден
+  /device/:id/status:
+    put:
+      summary: Update device status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - status
+              type: object
+              properties:
+                status:
+                  $ref: '#/components/schemas/DeviceStatus'
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+  /device/:id/command:
+    post:
+      summary: Send command to device
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceCommand'
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+        "400":
+          description: Неверная команда 
+
+components:
+  schemas:
+    DeviceType:
+      type: string
+      enum:
+        - HEATING
+        - ACCESS_CONTROL
+        - CAMERA
+        - LIGHT
+    DeviceStatus:
+      type: string
+      enum:
+        - ON
+        - OFF
+    DeviceInfo:
+      type: object
+      properties:
+        description:
+          type: string
+          description: Описание датчика
+        image:
+          type: string
+          description: Ссылка на изображение датчика
+        supported:
+          type: boolean
+          description: Флаг указывает, поддерживается ли данное устройство на данный момент
+        manual:
+          type: string
+          description: Инструкция по использованию
+    DeviceCommand:
+      type: object
+      properties:
+        temperature:
+          type: number
+          description: Комманда установить температуру
+        open:
+          type: boolean
+          description: Закрыть/открыть замок
+        turn_on:
+          type: boolean
+          description: Включить/выключить свет
+    Device:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор датчика
+        serial_number:
+          type: string
+          description: Серийный номер
+        type:
+          $ref: '#/components/schemas/DeviceType'
+        name:
+          type: string
+          description: Название датчика
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+        device_info:
+          $ref: '#/components/schemas/DeviceInfo'
+      required:
+        - id
+        - username
+        - email

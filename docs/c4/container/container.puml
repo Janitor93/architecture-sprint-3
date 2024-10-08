@@ -1,0 +1,71 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "User", "Пользователь системы")
+
+Container(api_gateway, "API Gateway", "Kong")
+
+Container_Boundary(user_container, "User Service") {
+  Container(user_service, "User Service", "Nest.js", "Логика по работе с пользователями с пользователями")
+  ContainerDb(user_db, "UserDB", "PostgreSQL", "Хранит информацию о пользователях")
+  Lay_D(user_service, user_db)
+}
+
+Container_Boundary(smart_home_container, "Smart Home Service") {
+  Container(smart_home_service, "Smart Home Service", "Nest.js", "Логика связанная с конфигурацией дома")
+  ContainerDb(smart_home_db, "SmartHomeDB", "PostgreSQL", "Хранит информацию о доме, такую как комнаты, датчики  комнате и другие настройки")
+  Lay_D(smart_home_service, smart_home_db)
+}
+
+Container_Boundary(device_container, "Device Service") {
+  Container(device_service, "Device Service", "Nest.js", "Позволяет работать с датчиками")
+  ContainerDb(device_db, "DeviceDB", "PostgreSQL", "Данные по датчикам")
+  Lay_D(device_service, device_db)
+}
+
+Container_Boundary(telemetry_container, "Telemetry Service") {
+  Container(telemetry_service, "Telemetry Service", "Nest.js", "Логика по работе с телеметрией")
+  ContainerDb(telemetry_db, "TelemetryDB", "MongoDB", "Данные телеметрии")
+  Lay_D(telemetry_service, telemetry_db)
+}
+
+Container_Boundary(scenarios_container, "Scenarios Service") {
+  Container(scenarios_service, "Scenarios Service", "Nest.js", "Позволяет создавать сценарии взаимодействия между различными датчиками")
+  ContainerDb(scenarios_db, "ScenariosDB", "PostgreSQL", "Хранит наборы допустимых команд и создаддые сценарии")
+}
+
+ContainerQueue(kafka, "Kafka")
+
+Container_Ext(device, "Device", "Физический датчик")
+
+Container(device_gateway, "Device Gateway")
+
+' External relations
+Rel(user, api_gateway, "Запросы с Web/Mobile-приложения", "https")
+
+' DB relations
+Rel_R(user_service, user_db, "Чтение/запись")
+Rel_R(smart_home_service, smart_home_db, "Чтение/запись")
+Rel_R(device_service, device_db, "Чтение/запись")
+Rel_R(telemetry_service, telemetry_db, "Чтение/запись")
+Rel_R(scenarios_service, scenarios_db, "Чтение/запись")
+
+' GW relations
+Rel(api_gateway, user_service, "API-запрос", "https")
+Rel(api_gateway, smart_home_service, "API-запрос", "https")
+Rel(api_gateway, device_service, "API-запрос", "https")
+Rel(api_gateway, telemetry_service, "API-запрос", "https")
+Rel(api_gateway, scenarios_service, "API-запрос", "https")
+
+' Kafka
+Rel_U(kafka, telemetry_container, "Sub")
+Rel(device_container, kafka, "Pub")
+BiRel(scenarios_container, kafka, "Pub/Sub")
+BiRel_U(device_gateway, kafka, "Pub/Sub")
+Rel_D(device_gateway, device, "Отправка команд", "MQTT")
+Rel_D(device, device_gateway, "Отправка данных", "MQTT")
+Lay_D(device_gateway, device)
+
+Rel_R(scenarios_container, device_container, "Сценарий делегирует датчикам команды", "gRPC")
+
+@enduml
