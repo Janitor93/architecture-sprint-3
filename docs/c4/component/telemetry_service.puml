@@ -1,0 +1,18 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Component_Ext(api_gateway, "API Gateway")
+
+Container_Boundary(telemetry_service_component, "Telemetry Service") {
+  Component(telemetry_service, "TelemetryService", "", "Содержит бизнес-логику")
+  Component(telemetry_repository, "TelemetryRepository", "", "Содержит логику по работе с базой данных")
+}
+ComponentDb_Ext(telemetry_db, "TelemetryDB", "", "Хранит информацию предоставленную датчиками")
+ComponentQueue_Ext(kafka, "Kafka")
+
+Rel(api_gateway, telemetry_service, "")
+Rel(telemetry_service, telemetry_repository, "")
+Rel(telemetry_repository, telemetry_db, "")
+Rel(telemetry_service, kafka, "- heatin\n - light\n - gate\n - camera", "Sub")
+
+@enduml

@@ -1,0 +1,32 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Enterprise_Boundary(smart_home_domain, "Smart Home") {
+  System_Boundary(user_domain, "Domain: User") {
+    Container(admin_subdomain, "Admin", "Subdomain", "* обновляют список датчиков партнеров")
+    Container(user_subdomain, "User", "Subdomain", "* пользователи системы")
+  }
+
+  System_Boundary(telemetry_domain, "Domain: Telemetry") {
+    Container(telemetry_subdomain, "Telemetry", "Subdomain", "* отслеживание данных устройств")
+    Container(telemetry_analysis, "Telemetry Analysis", "Subdomain", "* анализ данных")
+  }
+
+  System_Boundary(device_domain, "Domain: Device", "Domain") {
+    Container(device_management_subdomain, "Device Management", "Subdomain", "* список актуальных датчиков \n * управление датчиками")
+    Container(partner_device_subdomain, "Partner Device", "Subdomain", "* поддерживаемые датчики \n * добавление новых датчиков партнеров")
+    Container(scenarios_subdomain, "Scenarios", "Subdomain", "* сценарии взаимодействия датчиков между собой")
+  }
+
+  System_Boundary(home_domain, "Domain: Home") {
+    Container(home_subdomain, "Home", "Subdomain", "* регистрация дома\n * создание комнат\n * приглашение членов семьи")
+  }
+
+  Lay_D(user_domain, device_domain)
+  Lay_R(device_management_subdomain, partner_device_subdomain)
+  Lay_R(partner_device_subdomain, scenarios_subdomain)
+  Lay_R(device_domain, home_domain)
+}
+
+@enduml

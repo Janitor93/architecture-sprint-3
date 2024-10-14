@@ -1,0 +1,25 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Component_Ext(api_gateway, "API Gateway")
+Component_Ext(device_service, "Device Service")
+Component_Ext(kafka, "Kafka")
+
+Container_Boundary(scenarios_component, "Sceanrios") {
+  Component(scenarios_controller, "ScenariosController", "", "Обрабатывает пришедшие запросы")
+  Component(scenarios_service, "ScenariosService", "", "Содержит бизнес-логику")
+  Component(scenarios_repository, "ScenariosRepository", "", "Содержит логику по работе с базой данных")
+}
+ComponentDb_Ext(scenarios_db, "ScenariosDB", "", "Хранит сценарии")
+
+Rel(api_gateway, scenarios_controller, "")
+Rel(scenarios_controller, scenarios_service, "")
+Rel(scenarios_service, scenarios_repository, "")
+Rel(scenarios_repository, scenarios_db, "")
+
+Rel(scenarios_service, kafka, "- heatin\n - light\n - gate\n - camera", "Sub")
+Rel(kafka, scenarios_service, "- command", "Pub")
+
+Rel(scenarios_service, device_service, "Делегирует команду датчику", "gRPC")
+
+@enduml

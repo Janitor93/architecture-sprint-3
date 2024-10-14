@@ -1,0 +1,17 @@
+site_name: Smart Home
+plugins:
+  - plantuml:
+      puml_url: https://www.plantuml.com/plantuml/
+      num_workers: 8
+theme:
+  name: readthedocs
+  prev_next_buttons_location: none
+  titles_only: true
+nav:
+  - Introduction: index.md
+  - Monolith: monolith.md
+  - Domains: domains.md
+  - Microservices: microservices.md
+extra_css:
+  - style.css
+

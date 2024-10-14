@@ -1,5 +1,6 @@
 package ru.yandex.practicum.smarthome.controller;
 
+import org.json.JSONObject;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.smarthome.dto.HeatingSystemDto;
 import ru.yandex.practicum.smarthome.service.HeatingSystemService;
+import ru.yandex.practicum.smarthome.kafka.Producer;
 
 @RestController
 @RequestMapping("/api/heating")
@@ -21,6 +23,7 @@ import ru.yandex.practicum.smarthome.service.HeatingSystemService;
 public class HeatingSystemController {
 
     private final HeatingSystemService heatingSystemService;
+    private final Producer producer;
 
     private static final Logger logger = LoggerFactory.getLogger(HeatingSystemController.class);
 
@@ -38,16 +41,22 @@ public class HeatingSystemController {
     }
 
     @PostMapping("/{id}/turn-on")
-    public ResponseEntity<Void> turnOn(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> turnOn(@PathVariable("id") String id) {
         logger.info("Turning on heating system with id {}", id);
-        heatingSystemService.turnOn(id);
+        JSONObject payload = new JSONObject();
+        payload.put("id", id);
+        payload.put("action", "turn_on");
+        producer.sendMessage("device_command", payload.toString());
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/turn-off")
-    public ResponseEntity<Void> turnOff(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> turnOff(@PathVariable("id") String id) {
         logger.info("Turning off heating system with id {}", id);
-        heatingSystemService.turnOff(id);
+        JSONObject payload = new JSONObject();
+        payload.put("id", id);
+        payload.put("action", "turn_off");
+        producer.sendMessage("device_command", payload.toString());
         return ResponseEntity.noContent().build();
     }
 

@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://smart-home-monolith-postgresql.default:5432/smart_home
+    url: jdbc:postgresql://localhost:5431/smart_home
     username: your_username
     password: your_password
     hikari:
@@ -18,6 +18,21 @@ spring:
     init:
       mode: always
       schema-locations: classpath:init.sql
+  kafka:
+    producer:
+      # bootstrap-servers:  host.docker.internal:9092 huina
+      # bootstrap-servers:  localhost:9092 huina
+      # bootstrap-servers: host.docker.internal:9094 huina
+      bootstrap-servers: localhost:9094
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      # bootstrap-servers: host.docker.internal:9092
+      # bootstrap-servers: localhost:9092
+      # bootstrap-servers: host.docker.internal:9094
+      bootstrap-servers: localhost:9094
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
 server:
   port: 8080

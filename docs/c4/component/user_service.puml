@@ -1,0 +1,19 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Component_Ext(api_gateway, "API Gateway")
+
+Container_Boundary(user_service_component, "User Service") {
+  Component(user_controller, "UserController", "", "Обрабатывает пришедшие запросы, связанные с пользователями")
+  Component(user_service, "UserService", "", "Содержит бизнес-логику")
+  Component(user_repository, "UserRepository", "", "Содержит логику по работе с базой данных")
+}
+
+ComponentDb_Ext(user_db, "UserDB", "PostgreSQL", "Хранит информацию о пользователях")
+
+Rel(api_gateway, user_controller, "")
+Rel(user_controller, user_service, "")
+Rel(user_service, user_repository, "")
+Rel(user_repository, user_db, "")
+
+@enduml

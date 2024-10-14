@@ -1,0 +1,43 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Component_Ext(device_gateway, "Device Gateway", "Custom Gateway")
+Component_Ext(device_service, "Device Service")
+Component_Ext(telemetry_service, "Telemetry Service")
+Component_Ext(scenarios_service, "Scenarios Service")
+Component_Ext(smart_home_service, "Smart Home Service")
+
+Container_Boundary(kafka_component, "Kafka") {
+  Component(broker, "Broker", "", "Обрабатывает пришедшие запросы от сенсора")
+  Component(heating_topic, "Heating Topic", "", "")
+  Component(light_topic, "Light Topic", "", "")
+  Component(gate_topic, "Gate Topic", "", "")
+  Component(camera_topic, "Camera Topic", "", "")
+  Component(command_topic, "Command Topic", "", "")
+}
+
+Rel(device_gateway, broker, "- Heatin\n - Light\n - Gate\n - Camera", "Pub")
+Rel(broker, device_gateway, "Command", "Sub")
+
+Rel(broker, heating_topic, "")
+Rel(broker, light_topic, "")
+Rel(broker, gate_topic, "")
+Rel(broker, camera_topic, "")
+Rel_U(command_topic, broker, "")
+
+Rel(heating_topic, telemetry_service, "Sub")
+Rel(light_topic, telemetry_service, "Sub")
+Rel(gate_topic, telemetry_service, "Sub")
+Rel(camera_topic, telemetry_service, "Sub")
+
+Rel(heating_topic, scenarios_service, "Sub")
+Rel(light_topic, scenarios_service, "Sub")
+Rel(gate_topic, scenarios_service, "Sub")
+Rel(camera_topic, scenarios_service, "Sub")
+
+Rel_U(smart_home_service, command_topic, "Pub")
+Rel_U(scenarios_service, command_topic, "Pub")
+Rel_U(device_service, command_topic, "Pub")
+
+
+@enduml

@@ -1,0 +1,143 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Device Service API
+
+paths:
+  /telemetry/latest:
+    get:
+      summary: Get latest data
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  device_id:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/AnyObject'
+        "500":
+          description: Ошибка сервера
+  /telemetry:
+    get:
+      summary: Get data history
+      parameters:
+        - name: deviceId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  properties:
+                    id:
+                      type: string
+                    device_id:
+                      type: string
+                    timestamp:
+                      type: string
+                      format: date-time
+                    data:
+                      type: object
+                      $ref: '#/components/schemas/AnyObject'
+      
+
+components:
+  schemas:
+    AnyObject:
+      type: object
+    DeviceType:
+      type: string
+      enum:
+        - HEATING
+        - ACCESS_CONTROL
+        - CAMERA
+        - LIGHT
+    DeviceStatus:
+      type: string
+      enum:
+        - ON
+        - OFF
+    DeviceInfo:
+      type: object
+      properties:
+        description:
+          type: string
+          description: Описание датчика
+        image:
+          type: string
+          description: Ссылка на изображение датчика
+        supported:
+          type: boolean
+          description: Флаг указывает, поддерживается ли данное устройство на данный момент
+        manual:
+          type: string
+          description: Инструкция по использованию
+    DeviceCommand:
+      type: object
+      properties:
+        temperature:
+          type: number
+          description: Комманда установить температуру
+        open:
+          type: boolean
+          description: Закрыть/открыть замок
+        turn_on:
+          type: boolean
+          description: Включить/выключить свет
+    Device:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор датчика
+        serial_number:
+          type: string
+          description: Серийный номер
+        type:
+          $ref: '#/components/schemas/DeviceType'
+        name:
+          type: string
+          description: Название датчика
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+        device_info:
+          $ref: '#/components/schemas/DeviceInfo'
+      required:
+        - id
+        - username
+        - email

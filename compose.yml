@@ -1,0 +1,144 @@
+version: "3"
+
+services:
+  zookeeper:
+    image: zookeeper
+    ports:
+      - "2181:2181"
+    networks:
+      - smart-home-network
+
+  kafka:
+    image: confluentinc/cp-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - 9092:9092
+      - 9094:9094
+    environment:
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LISTENERS: INTERNAL://kafka:9092,OUTSIDE://0.0.0.0:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,OUTSIDE://kafka:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
+    networks:
+      - smart-home-network
+
+  init_kafka:
+    image: confluentinc/cp-kafka
+    depends_on:
+      - kafka
+    entrypoint: ['/bin/sh', '-c']
+    command: |
+      "
+      kafka-topics --bootstrap-server kafka:9092 --list
+
+      echo -e 'Creating kafka topics'
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic device_command --replication-factor 1 --partitions 1
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic device_status --replication-factor 1 --partitions 1
+      kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic sensor_data --replication-factor 1 --partitions 1
+
+      echo -e 'Successfully created the following topics:'
+      kafka-topics --bootstrap-server kafka:9092 --list
+      "
+    networks:
+      - smart-home-network
+    
+  devices_db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: devices
+    container_name: devices_db
+    ports:
+      - '5432:5432'
+    networks:
+      - smart-home-network
+  
+  devices:
+    build:
+      context: ./devices
+      dockerfile: Dockerfile
+    container_name: devices
+    restart: always
+    environment:
+      KAFKA: kafka:9094
+      DB_HOST: devices_db
+      DB_NAME: devices
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_PORT: 5432
+    ports:
+      - '3000:3000'
+    depends_on:
+      - devices_db
+      - kafka
+      - init_kafka
+    networks:
+      - smart-home-network
+
+  telemetry_db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: telemetry
+    container_name: telemetry_db
+    ports:
+      - '5433:5432'
+    networks:
+      - smart-home-network
+  
+  telemetry:
+    build:
+      context: ./telemetry
+      dockerfile: Dockerfile
+    container_name: telemetry
+    restart: always
+    environment:
+      KAFKA: kafka:9094
+      DB_HOST: telemetry_db
+      DB_NAME: telemetry
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_PORT: 5432
+    ports:
+      - '3001:3000'
+    depends_on:
+      - telemetry_db
+      - kafka
+      - init_kafka
+    networks:
+      - smart-home-network
+
+  smart_home_db:
+    image: postgres:13-alpine
+    container_name: smart_home_db
+    environment:
+      POSTGRES_DB: smart_home
+      POSTGRES_USER: your_username
+      POSTGRES_PASSWORD: your_password
+    ports:
+      - "5431:5432"
+    networks:
+      - smart-home-network
+  
+  gateway:
+    container_name: gateway
+    image: nginx:latest
+    ports:
+      - '80:80'
+    networks:
+      - smart-home-network
+    restart: always
+    volumes:
+      - ./nginx:/etc/nginx/
+
+
+networks:
+  smart-home-network:
+    driver: bridge
