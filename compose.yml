@@ -63,6 +63,7 @@ services:
       context: ./devices
       dockerfile: Dockerfile
     container_name: devices
+    restart: always
     environment:
       KAFKA: kafka:9094
       DB_HOST: devices_db
@@ -97,6 +98,7 @@ services:
       context: ./telemetry
       dockerfile: Dockerfile
     container_name: telemetry
+    restart: always
     environment:
       KAFKA: kafka:9094
       DB_HOST: telemetry_db
